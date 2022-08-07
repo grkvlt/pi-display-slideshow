@@ -2,13 +2,28 @@
 #
 # PI DISPLAY SLIDESHOW
 #
+# Raspberry PI slideshow for displaying posters on a portrait mode
+# monitor. The posters should be available as a publicly readable
+# Dropbox folder, provided as a download URL to the script.
+#
 # Version 0.1.3
 #
 # Usage:
 #   slideshow.sh [ config.ini ]
 #
-# Andrew Donald Kennedy
-# Copyright 2022 by BEHOLDER
+# Copyright 2022 by Andrew Donald Kennedy
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 #set -x # DEBUG
 

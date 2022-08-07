@@ -7,8 +7,9 @@
 # Usage:
 #   install.sh target-directory
 #
-# Andrew Donald Kennedy
-# Copyright 2022 by BEHOLDER
+# Copyright 2022 by Andrew Donald Kennedy
+#
+# Licensed under the Apache Software License, Version 2.0 
 
 # check for root user
 if [ "${EUID}" -ne 0 ]

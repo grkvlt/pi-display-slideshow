@@ -43,4 +43,4 @@ The following variables can be set in the configuration file:
 - **`SCREEN_RES`** - _Hardcoded screen resolution (as `XXXXxYYY`)_
 
 ---
-_Andrew Donald Kennedy_ / _andrew.international@gmail.com_ / _Copyright 2022 by BEHOLDER Heavy Industries_
+_Copyright 2022 by [Andrew Donald Kennedy](mailto:andrew.international@gmail.com) and Licensed under the [Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)_
