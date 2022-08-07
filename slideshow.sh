@@ -10,7 +10,7 @@
 # Andrew Donald Kennedy
 # Copyright 2022 by BEHOLDER
 
-#set -x # DEBUG
+set -x # DEBUG
 
 # load configuration file
 CONFIG_FILE="$(dirname $0)/$(basename $0 .sh).ini"
@@ -19,7 +19,6 @@ source=${1:-${CONFIG_FILE}}
 
 # dropbox configuration
 DROPBOX_URL="${DROPBOX_URL:-https://www.dropbox.com/sh/422x1u57rnc2op6/AADNP_LJe48lBRg1RS5-mtnpa/Posters}"
-DROPBOX_DIR="${DROPBOX_DIR:-./dropbox}"
 
 # slideshow configuration
 SLIDESHOW_LENGTH="${SLIDESHOW_LENGTH:-30}"
@@ -29,30 +28,40 @@ SLIDESHOW_JOIN="${SLIDESHOW_JOIN:-false}"
 
 # get screen size
 SCREEN_RES="${SCREEN_RES:-$(fbset | grep mode | cut -d\" -f2)}"
+SCREEN_X=$(echo ${SCREEN_RES} | cut -dx -f1)
+SCREEN_Y=$(echo ${SCREEN_RES} | cut -dx -f2)
+
+# setup directory
+SLIDESHOW_DIR="${SLIDESHOW_DIR:-./slideshow}"
+mkdir -p ${SLIDESHOW_DIR}
 
 # slideshow process id
 FEH_PID=""
 
-# setup directory
-mkdir -p ${DROPBOX_DIR}
-cd ${DROPBOX_DIR}
-
 while true ; do
     # download archive from dropbox
-    tmpfile=$(mktemp /tmp/dropbox.XXXXXX)
+    tmpfile=$(mktemp /tmp/slideshow.XXXXXX)
     wget ${DROPBOX_URL} -O ${tmpfile}.zip
 
     # extract files from archive
-    rm -f *.*
+    tmpdir=$(mktemp -d /tmp/slideshow.XXXXXX)
+    cd ${tmpdir}
     unzip -a ${tmpfile}.zip
+    rm -f ${tmpfile}.zip
 
-    # go through files in archive
+    # remove spaces etc from filenames
     ls -1 | while read file ; do
-        # check name and extension
+        fixed=$(echo "${file}" | tr " :-\'" "____")
+        mv "${file}" "${fixed}"
+    done
+
+    # convert all file formats to png and rotate
+    ls -1 | while read file ; do
+        # get name and extension
         extension="${file##*.}"
         filename="${file%.*}"
 
-        # convert all files to png
+        # convert to png
         if [ "${extension}" == "pdf" ] ; then
             pdftoppm -singlefile -f 1 -png "${file}" "${filename}"
             rm -f "${file}"
@@ -60,22 +69,44 @@ while true ; do
             convert "${file}" "${filename}.png"
             rm -f "${file}"
         fi 
+    done
         
-        # rotate 90 degrees
-        mogrify -rotate "-90" "${filename}.png"
+    # rotate 90 degrees if required
+    if ${SLIDESHOW_ROTATE} ; then
+        ls -1 *.png | while read file ; do
+            mogrify -rotate "-90" "${file}"
+        done
+    fi
 
-        # resize to screen
+    # join left/right pairs if required
+    if ${SLIDESHOW_JOIN} ; then
+        ls -1 *.png | xargs -n 2 echo | while read left right ; do
+            # resize left and right to fit screen height
+            mogrify -geometry "x${SCREEN_Y}" "${left}"
+            mogrify -geometry "x${SCREEN_Y}" "${right}"
+
+            # join left and right images
+            mogrify "${left}" "${right}" +append "${left}"
+            rm -f "${right}"
+        done
+    fi
+
+    # resize to screen
+    ls -1 *.png | while read file ; do
         mogrify -resize "${SCREEN_RES}" \
                 -background black \
                 -gravity center \
-                -extent "${SCREEN_RES}" "${filename}.png"
+                -extent "${SCREEN_RES}" "${file}"
     done
+
+    # copy files to target directory
+    cp *.png "${SLIDESHOW_DIR}"
 
     # run slideshow
     if [ "${FEH_PID}" ] ; then
         kill -USR1 ${FEH_PID}
     else
-        feh -F -Y -N --slideshow-delay "${SLIDESHOW_DELAY}" "${DROPBOX_DIR}" &
+        feh -F -Y -N --slideshow-delay "${SLIDESHOW_DELAY}" "${SLIDESHOW_DIR}" &
         FEH_PID=$!
     fi
 
