@@ -34,13 +34,13 @@ $ slideshow.sh
 
 The following variables can be set in the configuration file:
 
-- **DROPBOX_URL** Dropbox download link for posters
-- **DROPBOX_DIR** Dropbox folder to save files into
-- **SLIDESHOW_LENGTH** Slideshow length in minutes (defaults to 30)
-- **SLIDESHOW_DELAY** Delay between slides in seconds (defaults to 10)
-- **SLIDESHOW_ROTATE** Rotate posters for portrait mode?
-- **SLIDESHOW_JOIN** Join two posters with same prefix in landscape?
-- **SCREEN_RES** Hardcode screen resolution
+- **`DROPBOX_URL`** - _Dropbox download link for posters_
+- **`DROPBOX_DIR`** - _Dropbox folder to save files into_
+- **`SLIDESHOW_LENGTH`** - _Slideshow length in minutes (defaults to 30)_
+- **`SLIDESHOW_DELAY`** - _Delay between slides in seconds (defaults to 10)_
+- **`SLIDESHOW_ROTATE`** - _Rotate posters for portrait mode?_
+- **`SLIDESHOW_JOIN`** - _Join two posters with same prefix in landscape?_
+- **`SCREEN_RES`** - _Hardcoded screen resolution (as `XXXXxYYY`)_
 
-----
+---
 _Andrew Donald Kennedy_ / _andrew.international@gmail.com_ / _Copyright 2022 by BEHOLDER Heavy Industries_
