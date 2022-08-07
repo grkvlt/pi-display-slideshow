@@ -10,7 +10,7 @@
 # Andrew Donald Kennedy
 # Copyright 2022 by BEHOLDER
 
-set -x # DEBUG
+#set -x # DEBUG
 
 # load configuration file
 CONFIG_FILE="$(dirname $0)/$(basename $0 .sh).ini"
@@ -40,7 +40,7 @@ FEH_PID=""
 
 while true ; do
     # download archive from dropbox
-    tmpfile=$(mktemp /tmp/slideshow.XXXXXX)
+    tmpfile=$(mktemp -u /tmp/slideshow.XXXXXX)
     wget ${DROPBOX_URL} -O ${tmpfile}.zip
 
     # extract files from archive
@@ -86,8 +86,10 @@ while true ; do
             mogrify -geometry "x${SCREEN_Y}" "${right}"
 
             # join left and right images
-            mogrify "${left}" "${right}" +append "${left}"
-            rm -f "${right}"
+            join=$(mktemp -u /tmp/slideshow.XXXXXX)
+            convert "${left}" "${right}" +append "${join}.png"
+            rm -f "${left}" "${right}"
+            mv "${join}.png" "${left}"
         done
     fi
 
@@ -100,7 +102,8 @@ while true ; do
     done
 
     # copy files to target directory
-    cp *.png "${SLIDESHOW_DIR}"
+    rm -f ${SLIDESHOW_DIR}/*.png
+    cp *.png ${SLIDESHOW_DIR}
 
     # run slideshow
     if [ "${FEH_PID}" ] ; then
