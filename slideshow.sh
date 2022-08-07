@@ -2,7 +2,7 @@
 #
 # PI DISPLAY SLIDESHOW
 #
-# Version 0.1.2
+# Version 0.1.3
 #
 # Usage:
 #   slideshow.sh [ config.ini ]
@@ -21,23 +21,17 @@ source=${1:-${CONFIG_FILE}}
 DROPBOX_URL="${DROPBOX_URL:-https://www.dropbox.com/sh/422x1u57rnc2op6/AADNP_LJe48lBRg1RS5-mtnpa/Posters}"
 DROPBOX_DIR="${DROPBOX_DIR:-./dropbox}"
 
-echo "DROPBOX_DIR = ${DROPBOX_DIR}"
-exit
-
 # slideshow configuration
-SLIDESHOW_LENGTH="30"2# slideshow length in minutes
-#
-# Usage:
-#   pi-display-slideshow.sh [ config.ini ]
-SLIDESHOW_DELAY="10" # delay between slides in seconds
-SLIDESHOW_ROTATE="true" # rotate posters for portrait mode?
-SLIDESHOW_JOIN="false" # join two posters with same prefix in landscape
-
-FEH_PID=""
+SLIDESHOW_LENGTH="${SLIDESHOW_LENGTH:-30}"
+SLIDESHOW_DELAY="${SLIDESHOW_DELAY:-10}"
+SLIDESHOW_ROTATE="${SLIDESHOW_ROTATE:-true}"
+SLIDESHOW_JOIN="${SLIDESHOW_JOIN:-false}"
 
 # get screen size
-#screen="$(fbset | grep mode | cut -d\" -f2)"
-screen="2056x1329"
+SCREEN_RES="${SCREEN_RES:-$(fbset | grep mode | cut -d\" -f2)}"
+
+# slideshow process id
+FEH_PID=""
 
 # setup directory
 mkdir -p ${DROPBOX_DIR}
@@ -71,20 +65,21 @@ while true ; do
         mogrify -rotate "-90" "${filename}.png"
 
         # resize to screen
-        mogrify -resize "${screen}" \
+        mogrify -resize "${SCREEN_RES}" \
                 -background black \
                 -gravity center \
-                -extent "${screen}" "${filename}.png"
+                -extent "${SCREEN_RES}" "${filename}.png"
     done
 
     # run slideshow
     if [ "${FEH_PID}" ] ; then
-        kill -9 ${FEH_PID}
+        kill -USR1 ${FEH_PID}
+    else
+        feh -F -Y -N --slideshow-delay "${SLIDESHOW_DELAY}" "${DROPBOX_DIR}" &
+        FEH_PID=$!
     fi
-    feh -F -Y -N --slideshow-delay "${SLIDESHOW_DELAY}" "${DROPBOX_DIR}" &
-    FEH_PID=$!
 
     # wait for X minutes
-    delay=$((${SLIDESHOWWLENGTH} * 60))
+    delay=$((${SLIDESHOW_LENGTH} * 60))
     sleep ${delay}
 done
