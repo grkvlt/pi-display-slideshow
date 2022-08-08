@@ -42,13 +42,16 @@ fi
 # copy files to target directory
 mkdir -p ${TARGET_DIR}
 install -m 755 slideshow.sh ${TARGET_DIR}
-install -m 644 slideshow.ini ${TARGET_DIR}
+install -m 644 -o ${USER} slideshow.ini ${TARGET_DIR}
 
 # update PATH in profile
-cat <<EOF >> /etc/profile
-####
+cat <<EOF >> /etc/profile.d/slideshow.sh
+# PI DISPLAY SLIDESHOW PROFILE
+# Version 0.1.5
+# Copyright 2022 by Andrew Donald Kennedy
+# Licensed under the Apache Software License, Version 2.0 
+
 # add pi-display-slideshow directory to the PATH
 PATH=\${PATH}:${TARGET_DIR}
 export PATH
-####
 EOF

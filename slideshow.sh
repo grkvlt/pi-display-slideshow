@@ -27,12 +27,12 @@
 
 # debugging
 #set -x
-#DEBUG="true"
 
 # load configuration file
 CONFIG_FILE="$(dirname $0)/$(basename $0 .sh).ini"
 source=${1:-${CONFIG_FILE}}
 [ -f ${source} ] && . ${source}
+DEBUG="${DEBUG:-false}"
 
 # dropbox configuration
 DROPBOX_URL="${DROPBOX_URL}"
@@ -49,7 +49,7 @@ SCREEN_X=$(echo ${SCREEN_RES} | cut -dx -f1)
 SCREEN_Y=$(echo ${SCREEN_RES} | cut -dx -f2)
 
 # setup directory
-SLIDESHOW_DIR="${SLIDESHOW_DIR:-/tmp/slideshow}"
+SLIDESHOW_DIR="${SLIDESHOW_DIR:-/tmp/posters}"
 mkdir -p ${SLIDESHOW_DIR}
 
 # slideshow process
@@ -62,6 +62,7 @@ function error() {
     exit 1
 }
 
+# main slideshow display loop
 while true ; do
     # download archive from dropbox
     [ "${DROPBOX_URL}" ] || error "Must set DROPBOX_URL to a valid download link"
@@ -73,17 +74,17 @@ while true ; do
     tmpdir=$(mktemp -d /tmp/slideshow.XXXXXX)
     cd ${tmpdir}
     [ "${DEBUG}" ] || QUIET="-qq"
-    unzip ${QUIET} -a ${tmpfile}.zip || error "Failed to extract Dropbox archive"
+    unzip ${QUIET} ${tmpfile}.zip || error "Failed to extract Dropbox archive"
     rm -f ${tmpfile}.zip
 
     # remove spaces etc from filenames
-    ls -1 | while read file ; do
+    find . -type f -maxdepth 1 | while read file ; do
         fixed=$(echo "${file}" | tr " :-\'_" "-")
         mv "${file}" "${fixed}"
     done
 
     # convert all file formats to png and rotate
-    ls -1 | while read file ; do
+    find . -type f -maxdepth 1 | while read file ; do
         # get name and extension
         extension="${file##*.}"
         filename="${file%.*}"
@@ -108,8 +109,8 @@ while true ; do
         done
     fi
 
-    # join left/right pairs if required
-    if ${SLIDESHOW_JOIN} ; then
+    # otherwise join left/right pairs if required
+    if ! ${SLIDESHOW_ROTATE} && ${SLIDESHOW_JOIN} ; then
         ls -1 *.png | xargs -n 2 echo | while read left right ; do
             # if two files are available
             if [ -f "${right}" ] ; then
