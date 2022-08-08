@@ -32,7 +32,6 @@
 CONFIG_FILE="$(dirname $0)/$(basename $0 .sh).ini"
 source=${1:-${CONFIG_FILE}}
 [ -f ${source} ] && . ${source}
-DEBUG="${DEBUG:-false}"
 
 # dropbox configuration
 DROPBOX_URL="${DROPBOX_URL}"
@@ -44,7 +43,7 @@ SLIDESHOW_ROTATE="${SLIDESHOW_ROTATE:-true}"
 SLIDESHOW_JOIN="${SLIDESHOW_JOIN:-false}"
 
 # get screen size
-SCREEN_RES="${SCREEN_RES:-$(fbset | grep mode | cut -d\" -f2)}"
+SCREEN_RES="${SCREEN_RES:-$(fbset | grep "^mode " | cut -d\" -f2)}"
 SCREEN_X=$(echo ${SCREEN_RES} | cut -dx -f1)
 SCREEN_Y=$(echo ${SCREEN_RES} | cut -dx -f2)
 
@@ -60,6 +59,13 @@ FEH_LOG="${FEH_LOG:-$(mktemp -u /tmp/slideshow.XXXXXX).log}"
 function error() {
     echo "Error: $@" >&2
     exit 1
+}
+
+# debug message function
+function error() {
+    if [ "${DEBUG}" ] ; then
+        echo "SLIDESHOW $(date +"%Y%m%d%H%M%S") - $@"
+    fi
 }
 
 # main slideshow display loop
@@ -78,24 +84,28 @@ while true ; do
     rm -f ${tmpfile}.zip
 
     # remove spaces etc from filenames
-    find . -type f -maxdepth 1 | while read file ; do
+    debug "Fixing filenames"
+    find . -maxdepth 1 -type f | while read file ; do
         fixed=$(echo "${file}" | tr " \:\-\'_" "-----")
         mv "${file}" "${fixed}"
     done
 
     # convert all file formats to png and rotate
-    find . -type f -maxdepth 1 | while read file ; do
+    find . -maxdepth 1 -type f | while read file ; do
         # get name and extension
         extension="${file##*.}"
         filename="${file%.*}"
+        debug "Processing ${file}"
 
         # convert to png
         if [ "${extension}" == "pdf" ] ; then
             [ "${DEBUG}" ] || QUIET="-q"
+            debug "Converting from PDF"
             pdftoppm ${QUIET} -singlefile -f 1 -png "${file}" "${filename}" || error "Converting ${file} from PDF failed"
             rm -f "${file}"
         elif [ "${extension}" != "png" ] ; then
             [ "${DEBUG}" ] || QUIET="-quiet"
+            debug "Converting to PNG"
             convert ${QUIET} "${file}" "${filename}.png" || error "Converting ${file} to PNG failed"
             rm -f "${file}"
         fi 
@@ -105,6 +115,7 @@ while true ; do
     if ${SLIDESHOW_ROTATE} ; then
         ls -1 *.png | while read file ; do
             [ "${DEBUG}" ] || QUIET="-quiet"
+            debug "Rotating ${file}"
             mogrify ${QUIET} -rotate "-90" "${file}" || error "Failed to rotate ${file}"
         done
     fi
@@ -115,6 +126,7 @@ while true ; do
             # if two files are available
             if [ -f "${right}" ] ; then
                 [ "${DEBUG}" ] || QUIET="-quiet"
+                debug "Joining ${left} and ${right}"
 
                 # resize left and right to fit screen height
                 mogrify ${QUIET} -geometry "x${SCREEN_Y}" "${left}" || error "Failed to resize ${left}"
@@ -132,6 +144,7 @@ while true ; do
     # resize to screen
     ls -1 *.png | while read file ; do
         [ "${DEBUG}" ] || QUIET="-quiet"
+        debug "Resizing ${file}"
         mogrify ${QUIET} \
                 -resize "${SCREEN_RES}" \
                 -background black \
@@ -148,6 +161,7 @@ while true ; do
         kill -USR1 ${FEH_PID}
     else
         [ "${DEBUG}" ] || QUIET="--quiet" FEH_LOG="/dev/null"
+        debug "Running slideshow"
         feh -F -Y -N ${QUIET} \
                 --slideshow-delay "${SLIDESHOW_DELAY}" \
                 "${SLIDESHOW_DIR}" >> ${FEH_LOG} 2>&1 &
