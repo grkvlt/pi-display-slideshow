@@ -5,19 +5,19 @@ Raspberry PI slideshow for displaying posters on a portrait mode monitor. The po
 
 ### Version
 
-The latest development version is 0.1.5 and the latest release is [0.1.4](https://github.com/grkvlt/pi-display-slideshow/releases/tag/release-0.1.4).
+The latest development version is 0.1.6 and the latest release is [0.1.5](https://github.com/grkvlt/pi-display-slideshow/releases/tag/release-0.1.5).
 
 ## Install
 
 Download the install artifacts and extract the contents, then run the `install.sh` script as root. The target directory to install to shouyld be specified as the only argument to the script, as follows:
 
 ```
-$ wget https://github.com/grkvlt/pi-display-slideshow/archive/refs/tags/release-0.1.4.tar.gz
+$ wget https://github.com/grkvlt/pi-display-slideshow/archive/refs/tags/release-0.1.5.tar.gz
 ...
-$ tar zxvf release-0.1.4.tar.gz
-pi-display-slideshow-release-0.1.4/
+$ tar zxvf release-0.1.5.tar.gz
+pi-display-slideshow-release-0.1.5/
 ...
-$ cd pi-display-slideshow-release-0.1.4
+$ cd pi-display-slideshow-release-0.1.5
 $ sudo ./install.sh /opt/slideshow
 ...
 ```
