@@ -11,30 +11,33 @@
 #
 # Licensed under the Apache Software License, Version 2.0 
 
+# error handler function
+function error() {
+    echo "Error: $@" >&2
+    exit 1
+}
+
 # check for root user
-if [ "${EUID}" -ne 0 ]
-  then echo "Error: Please run installer as root" >&2
-  exit
-fi
+[ "${EUID}" -eq 0 ] || error "Please run installer as root"
 
 # setup target directory
 TARGET_DIR="$1"
 if [ -z "${TARGET_DIR}" ] ; then
-    echo "Error: Must specify target directory as first argument" >&2
-    exit
+    error "Must specify target directory as first argument"
 elif [ ! -d ${TARGET_DIR} ] ; then
     mkdir -p ${TARGET_DIR}
     chmod 755 ${TARGET_DIR}
 fi
 
 # install packages
-apt-get update
-apt-get --assume-yes install \
-        wget \
-        unzip \
-        poppler-utils \
-        imagemagick \
-        feh
+(   apt-get -qq update ;
+    apt-get -qq --assume-yes install \
+            wget \
+            unzip \
+            poppler-utils \
+            imagemagick \
+            feh
+) || error "Package installation failed"
 
 # copy files to target directory
 mkdir -p ${TARGET_DIR}

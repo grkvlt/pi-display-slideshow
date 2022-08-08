@@ -25,7 +25,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#set -x # DEBUG
+# debugging
+#set -x
+#DEBUG="true"
 
 # load configuration file
 CONFIG_FILE="$(dirname $0)/$(basename $0 .sh).ini"
@@ -33,7 +35,7 @@ source=${1:-${CONFIG_FILE}}
 [ -f ${source} ] && . ${source}
 
 # dropbox configuration
-DROPBOX_URL="${DROPBOX_URL:-https://www.dropbox.com/sh/422x1u57rnc2op6/AADNP_LJe48lBRg1RS5-mtnpa/Posters}"
+DROPBOX_URL="${DROPBOX_URL}"
 
 # slideshow configuration
 SLIDESHOW_LENGTH="${SLIDESHOW_LENGTH:-30}"
@@ -47,26 +49,36 @@ SCREEN_X=$(echo ${SCREEN_RES} | cut -dx -f1)
 SCREEN_Y=$(echo ${SCREEN_RES} | cut -dx -f2)
 
 # setup directory
-SLIDESHOW_DIR="${SLIDESHOW_DIR:-./slideshow}"
+SLIDESHOW_DIR="${SLIDESHOW_DIR:-/tmp/slideshow}"
 mkdir -p ${SLIDESHOW_DIR}
 
-# slideshow process id
+# slideshow process
 FEH_PID=""
+FEH_LOG="${FEH_LOG:-$(mktemp -u /tmp/slideshow.XXXXXX).log}"
+
+# error handler function
+function error() {
+    echo "Error: $@" >&2
+    exit 1
+}
 
 while true ; do
     # download archive from dropbox
+    [ "${DROPBOX_URL}" ] || error "Must set DROPBOX_URL to a valid download link"
     tmpfile=$(mktemp -u /tmp/slideshow.XXXXXX)
-    wget ${DROPBOX_URL} -O ${tmpfile}.zip
+    [ "${DEBUG}" ] || QUIET="--quiet"
+    wget ${QUIET} ${DROPBOX_URL} -O ${tmpfile}.zip || error "Failed to download from Dropbox"
 
     # extract files from archive
     tmpdir=$(mktemp -d /tmp/slideshow.XXXXXX)
     cd ${tmpdir}
-    unzip -a ${tmpfile}.zip
+    [ "${DEBUG}" ] || QUIET="-qq"
+    unzip ${QUIET} -a ${tmpfile}.zip || error "Failed to extract Dropbox archive"
     rm -f ${tmpfile}.zip
 
     # remove spaces etc from filenames
     ls -1 | while read file ; do
-        fixed=$(echo "${file}" | tr " :-\'" "____")
+        fixed=$(echo "${file}" | tr " :-\'_" "-")
         mv "${file}" "${fixed}"
     done
 
@@ -78,10 +90,12 @@ while true ; do
 
         # convert to png
         if [ "${extension}" == "pdf" ] ; then
-            pdftoppm -singlefile -f 1 -png "${file}" "${filename}"
+            [ "${DEBUG}" ] || QUIET="-q"
+            pdftoppm ${QUIET} -singlefile -f 1 -png "${file}" "${filename}" || error "Converting ${file} from PDF failed"
             rm -f "${file}"
         elif [ "${extension}" != "png" ] ; then
-            convert "${file}" "${filename}.png"
+            [ "${DEBUG}" ] || QUIET="-quiet"
+            convert ${QUIET} "${file}" "${filename}.png" || error "Converting ${file} to PNG failed"
             rm -f "${file}"
         fi 
     done
@@ -89,31 +103,39 @@ while true ; do
     # rotate 90 degrees if required
     if ${SLIDESHOW_ROTATE} ; then
         ls -1 *.png | while read file ; do
-            mogrify -rotate "-90" "${file}"
+            [ "${DEBUG}" ] || QUIET="-quiet"
+            mogrify ${QUIET} -rotate "-90" "${file}" || error "Failed to rotate ${file}"
         done
     fi
 
     # join left/right pairs if required
     if ${SLIDESHOW_JOIN} ; then
         ls -1 *.png | xargs -n 2 echo | while read left right ; do
-            # resize left and right to fit screen height
-            mogrify -geometry "x${SCREEN_Y}" "${left}"
-            mogrify -geometry "x${SCREEN_Y}" "${right}"
+            # if two files are available
+            if [ -f "${right}" ] ; then
+                [ "${DEBUG}" ] || QUIET="-quiet"
 
-            # join left and right images
-            join=$(mktemp -u /tmp/slideshow.XXXXXX)
-            convert "${left}" "${right}" +append "${join}.png"
-            rm -f "${left}" "${right}"
-            mv "${join}.png" "${left}"
+                # resize left and right to fit screen height
+                mogrify ${QUIET} -geometry "x${SCREEN_Y}" "${left}" || error "Failed to resize ${left}"
+                mogrify ${QUIET} -geometry "x${SCREEN_Y}" "${right}" || error "Failed to resize ${right}"
+
+                # join left and right images
+                join=$(mktemp -u /tmp/slideshow.XXXXXX)
+                convert ${QUIET} "${left}" "${right}" +append "${join}.png" || error "Failed joining ${left} to ${right}"
+                rm -f "${left}" "${right}"
+                mv "${join}.png" "${left}"
+            fi
         done
     fi
 
     # resize to screen
     ls -1 *.png | while read file ; do
-        mogrify -resize "${SCREEN_RES}" \
+        [ "${DEBUG}" ] || QUIET="-quiet"
+        mogrify ${QUIET} \
+                -resize "${SCREEN_RES}" \
                 -background black \
                 -gravity center \
-                -extent "${SCREEN_RES}" "${file}"
+                -extent "${SCREEN_RES}" "${file}" || error "Failed to resize to ${SCREEN_RES}"
     done
 
     # copy files to target directory
@@ -124,7 +146,10 @@ while true ; do
     if [ "${FEH_PID}" ] ; then
         kill -USR1 ${FEH_PID}
     else
-        feh -F -Y -N --slideshow-delay "${SLIDESHOW_DELAY}" "${SLIDESHOW_DIR}" &
+        [ "${DEBUG}" ] || QUIET="--quiet" FEH_LOG="/dev/null"
+        feh -F -Y -N ${QUIET} \
+                --slideshow-delay "${SLIDESHOW_DELAY}" \
+                "${SLIDESHOW_DIR}" >> ${FEH_LOG} 2>&1 &
         FEH_PID=$!
     fi
 
