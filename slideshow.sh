@@ -79,7 +79,7 @@ while true ; do
 
     # remove spaces etc from filenames
     find . -type f -maxdepth 1 | while read file ; do
-        fixed=$(echo "${file}" | tr " :-\'_" "-")
+        fixed=$(echo "${file}" | tr " :-\'_" "-----")
         mv "${file}" "${fixed}"
     done
 
