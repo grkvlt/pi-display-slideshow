@@ -74,7 +74,7 @@ while true ; do
     tmpdir=$(mktemp -d /tmp/slideshow.XXXXXX)
     cd ${tmpdir}
     [ "${DEBUG}" ] || QUIET="-qq"
-    unzip ${QUIET} ${tmpfile}.zip || error "Failed to extract Dropbox archive"
+    unzip ${QUIET} -b ${tmpfile}.zip
     rm -f ${tmpfile}.zip
 
     # remove spaces etc from filenames
