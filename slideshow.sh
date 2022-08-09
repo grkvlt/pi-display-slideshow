@@ -62,7 +62,7 @@ function error() {
 }
 
 # debug message function
-function error() {
+function debug() {
     if [ "${DEBUG}" ] ; then
         echo "SLIDESHOW $(date +"%Y%m%d%H%M%S") - $@"
     fi
