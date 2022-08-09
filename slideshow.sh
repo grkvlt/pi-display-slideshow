@@ -6,7 +6,7 @@
 # monitor. The posters should be available as a publicly readable
 # Dropbox folder, provided as a download URL to the script.
 #
-# Version 0.1.6
+# Version 0.1.7
 #
 # Usage:
 #   slideshow.sh [ config.ini ]

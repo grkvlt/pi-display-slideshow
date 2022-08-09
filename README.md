@@ -18,8 +18,8 @@ setting variables, which are documented below.
 
 ### Version
 
-The latest development version is 0.1.6 and the latest release is
-[0.1.5](https://github.com/grkvlt/pi-display-slideshow/releases/tag/version-0.1.5).
+The latest development version is 0.1.7 and the latest release is
+[0.1.6](https://github.com/grkvlt/pi-display-slideshow/releases/tag/version-0.1.6).
 
 This software is provided as Open Source using the Apache 2.0 license and
 is currently maintained by Andrew Kennedy.  All contributions are welcome,
@@ -32,12 +32,12 @@ Download the install artifacts and extract the contents, then run the
 specified as the only argument to the script, as follows:
 
 ```shell
-$ wget https://github.com/grkvlt/pi-display-slideshow/archive/refs/tags/version-0.1.5.tar.gz
+$ wget https://github.com/grkvlt/pi-display-slideshow/archive/refs/tags/version-0.1.6.tar.gz
 ...
-$ tar zxvf version-0.1.5.tar.gz
-pi-display-slideshow-version-0.1.5/
+$ tar zxvf version-0.1.6.tar.gz
+pi-display-slideshow-version-0.1.6/
 ...
-$ cd pi-display-slideshow-version-0.1.5
+$ cd pi-display-slideshow-version-0.1.6
 $ sudo ./install.sh /opt/slideshow
 ...
 ```
