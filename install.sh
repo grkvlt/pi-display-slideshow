@@ -5,7 +5,7 @@
 # Version 0.1.7
 #
 # Usage:
-#   install.sh target-directory
+#   install.sh target-directory [ target-user ]
 #
 # Copyright 2022 by Andrew Donald Kennedy
 #
@@ -29,6 +29,12 @@ elif [ ! -d ${TARGET_DIR} ] ; then
     chmod 755 ${TARGET_DIR}
 fi
 
+# setup target user (default pi) [ target-user ]
+TARGET_USER="$2"
+if [ -z "${TARGET_USER}" ] ; then
+    TARGET_USER="pi"
+fi
+
 # install packages
 (   apt-get -qq update ;
     apt-get -qq --assume-yes install \
@@ -42,7 +48,7 @@ fi
 # copy files to target directory
 mkdir -p ${TARGET_DIR}
 install -m 755 slideshow.sh ${TARGET_DIR}
-install -m 644 -o ${USER} slideshow.ini ${TARGET_DIR}
+install -m 644 -o ${TARGET_USER} slideshow.ini ${TARGET_DIR}
 
 # update PATH in profile
 cat <<EOF >> /etc/profile.d/slideshow.sh

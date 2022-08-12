@@ -27,8 +27,12 @@ including bug reports and pull requests, at the project's GitHub page.
 ## Install
 
 Download the install artifacts and extract the contents, then run the
-`install.sh` script as root. The target directory to install to shouyld be
-specified as the only argument to the script, as follows:
+`install.sh` script as root. The target directory to install to should be
+specified as the first argument to the script. If the configuration file
+is to be owned by a user other than `pi` then this should be given as the
+(optional) second argument.
+
+The installation process is as follows:
 
 ```shell
 $ wget https://github.com/grkvlt/pi-display-slideshow/archive/refs/tags/version-0.1.7.tar.gz
