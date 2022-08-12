@@ -51,8 +51,7 @@ SCREEN_Y=$(echo ${SCREEN_RES} | cut -dx -f2)
 SLIDESHOW_DIR="${SLIDESHOW_DIR:-/tmp/posters}"
 mkdir -p ${SLIDESHOW_DIR}
 
-# slideshow process
-FEH_PID=""
+# slideshow logging
 FEH_LOG="${FEH_LOG:-$(mktemp -u /tmp/slideshow.XXXXXX).log}"
 
 # error handler function
@@ -67,6 +66,23 @@ function debug() {
         echo "SLIDESHOW $(date +"%Y%m%d%H%M%S") - $@"
     fi
 }
+
+# start slideshow process
+function slideshow() {
+    [ "${DEBUG}" ] || QUIET="--quiet" FEH_LOG="/dev/null"
+    debug "Running slideshow process"
+    feh -F -Y -N ${QUIET} \
+            --slideshow-delay "${SLIDESHOW_DELAY}" \
+            --randomize \
+            "${SLIDESHOW_DIR}" >> ${FEH_LOG} 2>&1 &
+    FEH_PID=$!
+}
+
+# start slideshow if files in slideshow dir already
+[ "${DEBUG}" ] || QUIET="-q"
+if ( ls -1 "${SLIDESHOW_DIR}" | grep ${QUIET} "png" ) ; then
+    slideshow
+fi
 
 # main slideshow display loop
 while true ; do
@@ -156,16 +172,11 @@ while true ; do
     rm -f ${SLIDESHOW_DIR}/*.png
     cp *.png ${SLIDESHOW_DIR}
 
-    # run slideshow
-    if [ "${FEH_PID}" ] ; then
+    # start or restart slideshow
+    if [ "${FEH_PID}" ] && ps -p "${FEH_PID}" > /dev/null 2>&1 ; then
         kill -USR1 ${FEH_PID}
     else
-        [ "${DEBUG}" ] || QUIET="--quiet" FEH_LOG="/dev/null"
-        debug "Running slideshow"
-        feh -F -Y -N ${QUIET} \
-                --slideshow-delay "${SLIDESHOW_DELAY}" \
-                "${SLIDESHOW_DIR}" >> ${FEH_LOG} 2>&1 &
-        FEH_PID=$!
+        slideshow
     fi
 
     # wait for X minutes
