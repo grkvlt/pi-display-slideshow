@@ -18,8 +18,8 @@ setting variables, which are documented below.
 
 ### Version
 
-The latest development version is 0.1.7 and the latest release is
-[0.1.6](https://github.com/grkvlt/pi-display-slideshow/releases/tag/version-0.1.6).
+The latest development version is 0.1.8 and the latest release is
+[0.1.7](https://github.com/grkvlt/pi-display-slideshow/releases/tag/version-0.1.7).
 
 This software is provided as Open Source using the Apache 2.0 license and
 is currently maintained by Andrew Kennedy.  All contributions are welcome,
@@ -36,12 +36,12 @@ is to be owned by a user other than `pi` then this should be given as the
 The installation process is as follows:
 
 ```shell
-$ wget https://github.com/grkvlt/pi-display-slideshow/archive/refs/tags/version-0.1.6.tar.gz
+$ wget https://github.com/grkvlt/pi-display-slideshow/archive/refs/tags/version-0.1.7.tar.gz
 ...
-$ tar zxvf version-0.1.6.tar.gz
-pi-display-slideshow-version-0.1.6/
+$ tar zxvf version-0.1.7.tar.gz
+pi-display-slideshow-version-0.1.7/
 ...
-$ cd pi-display-slideshow-version-0.1.6
+$ cd pi-display-slideshow-version-0.1.7
 $ sudo ./install.sh /opt/slideshow
 ...
 ```
