@@ -25,6 +25,12 @@ This software is provided as Open Source using the Apache 2.0 license and
 is currently maintained by Andrew Kennedy.  All contributions are welcome,
 including bug reports and pull requests, at the project's GitHub page.
 
+### TODO
+
+1. Configure HTML pages to view
+2. Interlacing HTML with posters
+3. Better documentation
+
 ## Install
 
 Download the install artifacts and extract the contents, then run the
