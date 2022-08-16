@@ -87,6 +87,9 @@ function slideshow() {
     FEH_PID=$!
 }
 
+# disable screen blanking
+xset s noblank
+
 # start slideshow if files in slideshow dir already
 [ "${DEBUG}" ] || QUIET="-q"
 if ( ls -1 "${SLIDESHOW_DIR}" | grep ${QUIET} "png" ) ; then

@@ -65,3 +65,11 @@ cat <<EOF > /etc/profile.d/slideshow.sh
 PATH=\${PATH}:${TARGET_DIR}
 export PATH
 EOF
+
+# add slideshow to autostart
+AUTOSTART="/home/${TARGET_USER}/.config/lxsession/LXDE-pi/autostart"
+mkdir -p $(dirname ${AUTOSTART})
+cat <<EOF >> ${AUTOSTART}
+@${TARGET_DIR}/slideshow.sh
+EOF
+chown ${TARGET_USER} ${AUTOSTART}
