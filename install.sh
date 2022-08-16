@@ -50,10 +50,14 @@ mkdir -p ${TARGET_DIR}
 install -m 755 slideshow.sh ${TARGET_DIR}
 install -m 644 -o ${TARGET_USER} slideshow.ini ${TARGET_DIR}
 
+# create empty logfile
+LOGFILE="/var/log/slideshow.log"
+touch ${LOGFILE}
+chown ${TARGET_USER} ${LOGFILE}
+
 # update PATH in profile
-cat <<EOF >> /etc/profile.d/slideshow.sh
+cat <<EOF > /etc/profile.d/slideshow.sh
 # PI DISPLAY SLIDESHOW PROFILE
-# Version 0.1.5
 # Copyright 2022 by Andrew Donald Kennedy
 # Licensed under the Apache Software License, Version 2.0 
 

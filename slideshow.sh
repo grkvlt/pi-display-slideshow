@@ -53,18 +53,27 @@ mkdir -p ${SLIDESHOW_DIR}
 
 # slideshow logging
 FEH_LOG="${FEH_LOG:-$(mktemp -u /tmp/slideshow.XXXXXX).log}"
+LOGFILE="${LOGFILE:-/var/log/slideshow.log}"
 
 # error handler function
 function error() {
-    echo "Error: $@" >&2
+    log ERROR "$@"
     exit 1
 }
 
 # debug message function
 function debug() {
     if [ "${DEBUG}" ] ; then
-        echo "SLIDESHOW $(date +"%Y%m%d%H%M%S") - $@"
+        log DEBUG "$@"
     fi
+}
+
+# logging function
+function log() {
+    LEVEL="$1"
+    shift
+    MESSAGE="$@"
+    echo "${LEVEL} $(date +"%Y%m%d%H%M%S") ${MESSAGE}" | tee -a "${LOGFILE}"
 }
 
 # start slideshow process
