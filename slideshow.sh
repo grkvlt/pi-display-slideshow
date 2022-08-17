@@ -44,6 +44,7 @@ SLIDESHOW_JOIN="${SLIDESHOW_JOIN:-false}"
 
 # get screen size
 SCREEN_RES="${SCREEN_RES:-$(fbset | grep "^mode " | cut -d\" -f2)}"
+#SCREEN_RES="${SCREEN_RES:-$(system_profiler SPDisplaysDataType | grep Resolution | cut -d:  -f2 | cut -d\  -f2,4 | tr ' ' 'x')}"
 SCREEN_X=$(echo ${SCREEN_RES} | cut -dx -f1)
 SCREEN_Y=$(echo ${SCREEN_RES} | cut -dx -f2)
 
