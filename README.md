@@ -48,7 +48,7 @@ $ tar zxvf version-0.1.7.tar.gz
 pi-display-slideshow-version-0.1.7/
 ...
 $ cd pi-display-slideshow-version-0.1.7
-$ sudo ./install.sh /opt/slideshow
+$ sudo ./install.sh /opt/display
 ...
 ```
 

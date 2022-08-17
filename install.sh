@@ -5,11 +5,21 @@
 # Version 0.1.8
 #
 # Usage:
-#   install.sh target-directory [ target-user ]
+#   install.sh [ target-directory [ target-user ] ]
 #
 # Copyright 2022 by Andrew Donald Kennedy
 #
-# Licensed under the Apache Software License, Version 2.0 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 # error handler function
 function error() {
@@ -20,19 +30,14 @@ function error() {
 # check for root user
 [ "${EUID}" -eq 0 ] || error "Please run installer as root"
 
+# install configuration variables
+TARGET_DIR="${1:-/slideshow}"
+TARGET_USER="${2:-pi}"
+
 # setup target directory
-TARGET_DIR="$1"
-if [ -z "${TARGET_DIR}" ] ; then
-    error "Must specify target directory as first argument"
-elif [ ! -d ${TARGET_DIR} ] ; then
+if [ ! -d ${TARGET_DIR} ] ; then
     mkdir -p ${TARGET_DIR}
     chmod 755 ${TARGET_DIR}
-fi
-
-# setup target user (default pi) [ target-user ]
-TARGET_USER="$2"
-if [ -z "${TARGET_USER}" ] ; then
-    TARGET_USER="pi"
 fi
 
 # install packages
@@ -46,7 +51,6 @@ fi
 ) || error "Package installation failed"
 
 # copy files to target directory
-mkdir -p ${TARGET_DIR}
 install -m 755 slideshow.sh ${TARGET_DIR}
 install -m 644 -o ${TARGET_USER} slideshow.ini ${TARGET_DIR}
 
