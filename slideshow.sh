@@ -87,7 +87,9 @@ function slideshow() {
     FEH_PID=$!
 }
 
-# disable screen blanking
+# turn off screen blanking
+xset s off
+xset -dpms
 xset s noblank
 
 # start slideshow if files in slideshow dir already
