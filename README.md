@@ -27,8 +27,8 @@ including bug reports and pull requests, at the project's GitHub page.
 
 ### TODO
 
-1. Configure HTML pages to view
-2. Interlacing HTML with posters
+1. Easier specification of source posters
+2. More configuration options
 3. Better documentation
 
 ## Install
@@ -68,13 +68,16 @@ be displayed.
 
 ## Usage
 
-Run the `slideshow.sh` script, which should be available on the users PATH
-after installation. You may need to re-login for this to take effect. If no
-arguments are provided, the [`slideshow.ini`](slideshow.ini) installed in
-the same directory as the script will be used, otherwise the first argument
-should point to a file with the configuration variables for the slideshow.
+The slideshow should start automatically on boot.
 
-```
+Run the `slideshow.sh` script from a terminal, which should be
+available on the users `PATH` after installation. You may need to
+re-login for this to take effect. If no arguments are provided, the
+[`slideshow.ini`](slideshow.ini) installed in the same directory
+as the script will be used, otherwise the first argument should
+point to a file with the configuration variables for the slideshow.
+
+```shell
 $ slideshow.sh landscape.ini
 ```
 
