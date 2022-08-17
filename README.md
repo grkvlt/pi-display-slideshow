@@ -106,6 +106,12 @@ The following variables can be set in the configuration file:
 - **`SLIDESHOW_JOIN`** - _Join two posters with same prefix in landscape mode? (default false)_
 - **`SCREEN_RES`** - _Hardcoded screen resolution as `XXXXxYYY`_
 
+#### Debugging and Logging
+
+- **`DEBUG`** - _Enable debugging by setting this variable_
+- **`FEH_LOG`** - _Logfile location for the slideshow application_
+- **`LOGFILE`** - _Logfile location for this script_
+
 ### Config File
 
 The following configuration should be saved as `landscape.ini` and can be
