@@ -105,13 +105,14 @@ while true ; do
     [ "${DROPBOX_URL}" ] || error "Must set DROPBOX_URL to a valid download link"
     tmpfile=$(mktemp -u /tmp/slideshow.XXXXXX)
     [ "${DEBUG}" ] || QUIET="--quiet"
-    wget ${QUIET} ${DROPBOX_URL} -O ${tmpfile}.zip || error "Failed to download from Dropbox"
+    wget ${QUIET} ${DROPBOX_URL} -O ${tmpfile}.zip >> ${LOGFILE} 2>&1 ||
+            error "Failed to download from Dropbox"
 
     # extract files from archive
     tmpdir=$(mktemp -d /tmp/slideshow.XXXXXX)
     cd ${tmpdir}
     [ "${DEBUG}" ] || QUIET="-qq"
-    unzip ${QUIET} -b ${tmpfile}.zip
+    unzip ${QUIET} -b ${tmpfile}.zip >> ${LOGFILE} 2>&1
     rm -f ${tmpfile}.zip
 
     # remove spaces etc from filenames
@@ -119,6 +120,7 @@ while true ; do
     find . -maxdepth 1 -type f | while read file ; do
         fixed=$(echo "${file}" | tr " \:\|\'_" "-")
         mv "${file}" "${fixed}"
+        debug "Renamed to ${fixed}"
     done
 
     # convert all file formats to png and rotate
@@ -132,12 +134,14 @@ while true ; do
         if [ "${extension}" == "pdf" ] ; then
             [ "${DEBUG}" ] || QUIET="-q"
             debug "Converting from PDF"
-            pdftoppm ${QUIET} -singlefile -f 1 -png "${file}" "${filename}" || error "Converting ${file} from PDF failed"
+            pdftoppm ${QUIET} -singlefile -f 1 -png "${file}" "${filename}" >> ${LOGFILE} 2>&1 ||
+                    error "Converting ${file} from PDF failed"
             rm -f "${file}"
         elif [ "${extension}" != "png" ] ; then
             [ "${DEBUG}" ] || QUIET="-quiet"
             debug "Converting to PNG"
-            convert ${QUIET} "${file}" "${filename}.png" || error "Converting ${file} to PNG failed"
+            convert ${QUIET} "${file}" "${filename}.png" >> ${LOGFILE} 2>&1 ||
+                    error "Converting ${file} to PNG failed"
             rm -f "${file}"
         fi 
     done
@@ -160,12 +164,15 @@ while true ; do
                 debug "Joining ${left} and ${right}"
 
                 # resize left and right to fit screen height
-                mogrify ${QUIET} -geometry "x${SCREEN_Y}" "${left}" || error "Failed to resize ${left}"
-                mogrify ${QUIET} -geometry "x${SCREEN_Y}" "${right}" || error "Failed to resize ${right}"
+                mogrify ${QUIET} -geometry "x${SCREEN_Y}" "${left}" >> ${LOGFILE} 2>&1 ||
+                        error "Failed to resize ${left}"
+                mogrify ${QUIET} -geometry "x${SCREEN_Y}" "${right}" >> ${LOGFILE} 2>&1 ||
+                        error "Failed to resize ${right}"
 
                 # join left and right images
                 join=$(mktemp -u /tmp/slideshow.XXXXXX)
-                convert ${QUIET} "${left}" "${right}" +append "${join}.png" || error "Failed joining ${left} to ${right}"
+                convert ${QUIET} "${left}" "${right}" +append "${join}.png" >> ${LOGFILE} 2>&1
+                        || error "Failed joining ${left} to ${right}"
                 rm -f "${left}" "${right}"
                 mv "${join}.png" "${left}"
             fi
@@ -180,15 +187,18 @@ while true ; do
                 -resize "${SCREEN_RES}" \
                 -background black \
                 -gravity center \
-                -extent "${SCREEN_RES}" "${file}" || error "Failed to resize to ${SCREEN_RES}"
+                -extent "${SCREEN_RES}" "${file}" >> ${LOGFILE} 2>&1 ||
+                        error "Failed to resize to ${SCREEN_RES}"
     done
 
-    # copy files to target directory
+    # copy files to slideshow directory
+    debug "Copying to ${SLIDESHOW_DIR}"
     rm -f ${SLIDESHOW_DIR}/*.png
     cp *.png ${SLIDESHOW_DIR}
 
     # start or restart slideshow
     if [ "${FEH_PID}" ] && ps -p "${FEH_PID}" > /dev/null 2>&1 ; then
+        debug "Signalling slideshow PID ${FEH_PID}"
         kill -USR1 ${FEH_PID}
     else
         slideshow
@@ -196,5 +206,6 @@ while true ; do
 
     # wait for X minutes
     delay=$((${SLIDESHOW_LENGTH} * 60))
+    debug "Waiting for ${delay} seconds"
     sleep ${delay}
 done
