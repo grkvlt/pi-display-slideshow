@@ -59,14 +59,11 @@ LOGFILE="${LOGFILE:-/var/log/slideshow.log}"
 # error handler function
 function error() {
     log ERROR "$@"
-    exit 1
 }
 
 # debug message function
 function debug() {
-    if [ "${DEBUG}" ] ; then
-        log DEBUG "$@"
-    fi
+    [ "${DEBUG}" ] && log DEBUG "$@"
 }
 
 # logging function
@@ -118,9 +115,11 @@ while true ; do
     # remove spaces etc from filenames
     debug "Fixing filenames"
     find . -maxdepth 1 -type f | while read file ; do
-        fixed=$(echo "${file}" | tr " \:\|\'_" "-")
-        mv "${file}" "${fixed}"
-        debug "Renamed to ${fixed}"
+        fixed=$(echo "${file}" | tr " \&\:\|\'_" "-")
+        if [ "${file}" != "${fixed}" ] ; then
+            mv "${file}" "${fixed}"
+            debug "Renamed to ${fixed}"
+        fi
     done
 
     # convert all file formats to png and rotate
@@ -151,7 +150,10 @@ while true ; do
         ls -1 *.png | while read file ; do
             [ "${DEBUG}" ] || QUIET="-quiet"
             debug "Rotating ${file}"
-            mogrify ${QUIET} -rotate "-90" "${file}" || error "Failed to rotate ${file}"
+            mogrify ${QUIET} -rotate "-90" "${file}" >> ${LOGFILE} 2>&1 || {
+                error "Failed to rotate ${file}"
+                rm -f "${file}"
+            }
         done
     fi
 
@@ -171,8 +173,8 @@ while true ; do
 
                 # join left and right images
                 join=$(mktemp -u /tmp/slideshow.XXXXXX)
-                convert ${QUIET} "${left}" "${right}" +append "${join}.png" >> ${LOGFILE} 2>&1
-                        || error "Failed joining ${left} to ${right}"
+                convert ${QUIET} "${left}" "${right}" +append "${join}.png" >> ${LOGFILE} 2>&1 ||
+                        error "Failed joining ${left} to ${right}"
                 rm -f "${left}" "${right}"
                 mv "${join}.png" "${left}"
             fi
@@ -187,8 +189,10 @@ while true ; do
                 -resize "${SCREEN_RES}" \
                 -background black \
                 -gravity center \
-                -extent "${SCREEN_RES}" "${file}" >> ${LOGFILE} 2>&1 ||
-                        error "Failed to resize to ${SCREEN_RES}"
+                -extent "${SCREEN_RES}" "${file}" >> ${LOGFILE} 2>&1 || {
+            error "Failed to resize to ${SCREEN_RES}"
+            rm -f "${file}"
+        }
     done
 
     # copy files to slideshow directory
