@@ -2,7 +2,7 @@
 #
 # PI DISPLAY SLIDESHOW INSTALL
 #
-# Version 0.1.8
+# Version 0.1.9
 #
 # Usage:
 #   install.sh [ target-directory [ target-user ] ]
