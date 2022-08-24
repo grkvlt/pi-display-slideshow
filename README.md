@@ -81,6 +81,15 @@ point to a file with the configuration variables for the slideshow.
 $ slideshow.sh landscape.ini
 ```
 
+Output will be logged to `/var/log/slideshow.log` or the file specified in
+the `LOGFILE` configuration setting. The log contents will contain more
+detailed information if the `DEBUG` setting is set to any non-empty value.
+
+```text
+INFO 220824213701 Running slideshow process
+DEBUG 220824213702 Slideshow PID is 8132 logging at /tmp/slideshow.a139bb.log
+```
+
 ### Posters
 
 The slideshow linked to by `DROPBOX_URL` should point to the public
@@ -110,7 +119,7 @@ The following variables can be set in the configuration file:
 
 - **`DEBUG`** - _Enable debugging by setting this variable_
 - **`FEH_LOG`** - _Logfile location for the slideshow application_
-- **`LOGFILE`** - _Logfile location for this script_
+- **`LOGFILE`** - _Logfile location for this script (defaults to `/var/log/slideshow.log`)_
 
 ### Config File
 

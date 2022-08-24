@@ -95,6 +95,7 @@ function slideshow() {
             --randomize \
             "${SLIDESHOW_DIR}" >> ${FEH_LOG} 2>&1 &
     FEH_PID=$!
+    debug "Slideshow PID is ${FEH_PID} logging at ${FEH_LOG}"
 }
 
 # turn off screen blanking
